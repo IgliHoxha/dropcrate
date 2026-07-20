@@ -17,7 +17,7 @@ automatically after a configurable time-to-live.
                  └──────┬───────┘
                         │
    gRPC  ─────▶  ┌──────▼───────┐
-                 │   rpc        │
+                 │     rpc      │
                  └──────┬───────┘
                         │
                  ┌──────▼───────┐
@@ -25,8 +25,8 @@ automatically after a configurable time-to-live.
                  └──┬────┬───┬──┘
       metadata ─────┘    │   └───── bytes
    ┌───────────┐   ┌─────▼─────┐   ┌────────────┐
-   │  MySQL    │   │  Redis    │   │  S3 / MinIO│
-   │ (files)   │   │  (cache)  │   │  (objects) │
+   │   MySQL   │   │   Redis   │   │ S3 / MinIO │
+   │  (files)  │   │  (cache)  │   │ (objects)  │
    └───────────┘   └───────────┘   └────────────┘
 ```
 
