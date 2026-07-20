@@ -16,18 +16,22 @@ automatically after a configurable time-to-live.
    HTTP  ─────▶  │   api (chi)  │
                  └──────┬───────┘
                         │
-                 ┌──────▼───────┐
+                        ▼
+                 ┌──────────────┐
    gRPC  ─────▶  │     rpc      │
                  └──────┬───────┘
                         │
-                 ┌──────▼───────┐
+                        ▼
+                 ┌──────────────┐
                  │   service    │  upload / download / delete
-                 └──┬────┬───┬──┘
-      metadata ─────┘    │   └───── bytes
-   ┌───────────┐   ┌─────▼─────┐   ┌────────────┐
-   │   MySQL   │   │   Redis   │   │ S3 / MinIO │
-   │  (files)  │   │  (cache)  │   │ (objects)  │
-   └───────────┘   └───────────┘   └────────────┘
+                 └──────┬───────┘
+                        │
+        ┌───────────────┼───────────────┐
+        ▼               ▼               ▼
+  ┌───────────┐   ┌───────────┐   ┌────────────┐
+  │   MySQL   │   │   Redis   │   │ S3 / MinIO │
+  │  (files)  │   │  (cache)  │   │ (objects)  │
+  └───────────┘   └───────────┘   └────────────┘
 ```
 
 Both the HTTP and gRPC transports call the same `service` layer, so they share
