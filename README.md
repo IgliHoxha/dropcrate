@@ -12,12 +12,12 @@ automatically after a configurable time-to-live.
 ## Architecture
 
 ```
-   HTTP  ─────▶  ┌──────────────┐
-                 │   api (chi)  │
+                 ┌──────────────┐
+   HTTP  ─────▶  │   api (chi)  │
                  └──────┬───────┘
                         │
-   gRPC  ─────▶  ┌──────▼───────┐
-                 │     rpc      │
+                 ┌──────▼───────┐
+   gRPC  ─────▶  │     rpc      │
                  └──────┬───────┘
                         │
                  ┌──────▼───────┐
