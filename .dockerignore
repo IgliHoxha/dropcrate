@@ -1,0 +1,13 @@
+.git
+.gitignore
+.github
+.env
+*.md
+!README.md
+/dropcrate
+/bin/
+/storage/
+*.test
+*.out
+coverage.*
+docker-compose.yaml

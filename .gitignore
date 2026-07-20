@@ -1,0 +1,24 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/dropcrate
+/bin/
+
+# Test binary and coverage
+*.test
+*.out
+coverage.*
+
+# Local environment
+.env
+/storage/
+
+# Go workspace file
+go.work
+go.work.sum
+
+# Local Claude Code instructions (not committed).
+CLAUDE.md

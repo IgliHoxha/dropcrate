@@ -1,0 +1,104 @@
+openapi: 3.0.3
+info:
+  title: dropcrate API
+  description: Expiring object-storage and file-sharing service.
+  version: 0.1.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /healthz:
+    get:
+      summary: Liveness probe
+      responses:
+        '200':
+          description: Service is up
+  /v1/files:
+    post:
+      summary: Upload a file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                ttl:
+                  type: string
+                  description: >
+                    Optional lifetime as a Go duration (e.g. "24h").
+                    Omit to use the server default; "0" or "never" to keep forever.
+              required: [file]
+      responses:
+        '201':
+          description: File stored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+        '400':
+          description: Missing file or invalid ttl
+        '413':
+          description: Upload exceeds the size limit
+  /v1/files/{id}:
+    get:
+      summary: Download a file
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: File bytes
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        '404':
+          description: Not found or expired
+    delete:
+      summary: Delete a file
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '204':
+          description: Deleted
+  /v1/files/{id}/meta:
+    get:
+      summary: Fetch file metadata
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'
+        '404':
+          description: Not found or expired
+components:
+  schemas:
+    File:
+      type: object
+      properties:
+        id: { type: string }
+        filename: { type: string }
+        content_type: { type: string }
+        size: { type: integer, format: int64 }
+        created_at: { type: string, format: date-time }
+        expires_at: { type: string, format: date-time, nullable: true }
+    UploadResponse:
+      allOf:
+        - $ref: '#/components/schemas/File'
+        - type: object
+          properties:
+            download_url: { type: string }

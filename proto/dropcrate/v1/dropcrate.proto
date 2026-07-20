@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package dropcrate.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/IgliHoxha/dropcrate/internal/rpc/dropcratev1;dropcratev1";
+
+// FileService is the gRPC transport for dropcrate. It mirrors the HTTP API,
+// exposing the same upload/download/metadata/delete use cases over gRPC.
+service FileService {
+  // Upload streams a file to the store. The first message on the stream MUST
+  // carry `info`; every subsequent message carries a `chunk` of the bytes.
+  rpc Upload(stream UploadRequest) returns (FileInfo);
+
+  // Download streams a file back. The first response carries `info`; the
+  // remaining responses carry `chunk`s of the bytes in order.
+  rpc Download(DownloadRequest) returns (stream DownloadResponse);
+
+  // GetMetadata returns a file's record without its bytes.
+  rpc GetMetadata(GetMetadataRequest) returns (FileInfo);
+
+  // Delete removes a file's bytes and metadata. Deleting an unknown id is a
+  // no-op and succeeds.
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+}
+
+// FileInfo is the metadata dropcrate tracks for a stored file.
+message FileInfo {
+  string id = 1;
+  string filename = 2;
+  string content_type = 3;
+  int64 size = 4;
+  google.protobuf.Timestamp created_at = 5;
+  // expires_at is unset when the file never expires.
+  google.protobuf.Timestamp expires_at = 6;
+}
+
+// UploadInfo is the header sent as the first Upload message.
+message UploadInfo {
+  string filename = 1;
+  string content_type = 2;
+  // ttl_seconds controls the file's lifetime:
+  //   0        -> use the server default TTL
+  //   negative -> never expire
+  //   positive -> expire this many seconds after creation
+  int64 ttl_seconds = 3;
+}
+
+message UploadRequest {
+  oneof payload {
+    UploadInfo info = 1; // first message only
+    bytes chunk = 2;     // subsequent messages
+  }
+}
+
+message DownloadRequest {
+  string id = 1;
+}
+
+message DownloadResponse {
+  oneof payload {
+    FileInfo info = 1; // first message only
+    bytes chunk = 2;   // subsequent messages
+  }
+}
+
+message GetMetadataRequest {
+  string id = 1;
+}
+
+message DeleteRequest {
+  string id = 1;
+}
+
+message DeleteResponse {}
