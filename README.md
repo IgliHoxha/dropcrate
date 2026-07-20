@@ -7,7 +7,11 @@ automatically after a configurable time-to-live.
 - Bytes are stored in any **S3-compatible** bucket (MinIO locally, AWS S3 in prod).
 - Metadata lives in **MySQL**.
 - Hot lookups are cached in **Redis**.
-- Uploaded links can **expire** — set a per-file TTL or fall back to the server default.
+- Uploaded links can **expire**: set a per-file TTL or fall back to the server default.
+
+<p align="center">
+  <img src="docs/img/api-try.png" alt="Terminal: uploading photo.png with a 24h TTL returns JSON with an id, size, expires_at and a shareable download_url; a follow-up GET streams the bytes back as image/png" width="820">
+</p>
 
 ## Architecture
 
@@ -80,6 +84,20 @@ make run
 
 Configuration is read from the environment; copy `.env.example` to `.env` and
 adjust as needed. Defaults target the bundled `docker-compose` stack.
+
+The full contract lives in [`docs/openapi.yaml`](docs/openapi.yaml). Rendered in
+Swagger UI, the surface is small and self-describing:
+
+<p align="center">
+  <img src="docs/img/api-docs.png" alt="Swagger UI rendering of the dropcrate OpenAPI spec: GET /healthz, POST /v1/files (upload), GET /v1/files/{id} (download), DELETE /v1/files/{id}, and GET /v1/files/{id}/meta" width="860">
+</p>
+
+Every upload is a real object in the S3-compatible bucket, stored under a
+`files/` prefix and keyed by its file id. MinIO's console shows them landing:
+
+<p align="center">
+  <img src="docs/img/storage.png" alt="MinIO console object browser listing the dropcrate bucket's files/ prefix: many objects keyed by UUID, most 665 B, totalling 49 objects" width="860">
+</p>
 
 ## API
 
@@ -200,7 +218,14 @@ KAFKA_BROKERS=127.0.0.1:9092 make run
 ## Observability
 
 - **Metrics** — Prometheus counters and latency histograms for both transports,
-  plus Go runtime metrics, at `GET /metrics`.
+  plus Go runtime metrics, at `GET /metrics`. Scraped into a dashboard, a live
+  instance looks like this: request volume per route, download p50/p95, status
+  and gRPC breakdown, all straight from `/metrics`.
+
+  <p align="center">
+    <img src="docs/img/live-metrics.png" alt="dropcrate runtime metrics dashboard: 197 total requests, 96.4% success, 41 files uploaded, 85 downloads served, requests-by-route bars, download p50 2.5ms and p95 4.8ms, and a status-code breakdown" width="900">
+  </p>
+
 - **Tracing** — optional OpenTelemetry spans on both transports, off unless
   `OTEL_EXPORTER_OTLP_ENDPOINT` is set. `make up` starts a local Jaeger
   (UI at http://localhost:16686):
