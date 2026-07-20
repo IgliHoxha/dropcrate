@@ -107,8 +107,8 @@ dropcrate speaks two protocols over the same use cases: **HTTP** (default
 ### Authentication
 
 Authentication is **off by default**. Set `API_KEYS` (comma-separated) to
-require a bearer key on the mutating operations — **upload** and **delete** —
-on both transports. Reads stay open so shareable download links keep working.
+require a bearer key on the mutating operations (**upload** and **delete**) on
+both transports. Reads stay open so shareable download links keep working.
 
 ```shell
 export API_KEYS=secret-key
@@ -198,7 +198,7 @@ Regenerate the stubs after editing `proto/` with `make proto` (needs
 
 dropcrate can publish a best-effort domain event whenever a file's lifecycle
 changes. Publishing is **off by default** and only activates when `KAFKA_BROKERS`
-is set — otherwise a no-op publisher is used and nothing changes. A broker
+is set: otherwise a no-op publisher is used and nothing changes. A broker
 problem never blocks or fails a request; events are emitted asynchronously.
 
 | Event                | Emitted when                          |
@@ -217,7 +217,7 @@ KAFKA_BROKERS=127.0.0.1:9092 make run
 
 ## Observability
 
-- **Metrics** — Prometheus counters and latency histograms for both transports,
+- **Metrics**: Prometheus counters and latency histograms for both transports,
   plus Go runtime metrics, at `GET /metrics`. Scraped into a dashboard, a live
   instance looks like this: request volume per route, download p50/p95, status
   and gRPC breakdown, all straight from `/metrics`.
@@ -226,7 +226,7 @@ KAFKA_BROKERS=127.0.0.1:9092 make run
     <img src="docs/img/live-metrics.png" alt="dropcrate runtime metrics dashboard: 197 total requests, 96.4% success, 41 files uploaded, 85 downloads served, requests-by-route bars, download p50 2.5ms and p95 4.8ms, and a status-code breakdown" width="900">
   </p>
 
-- **Tracing** — optional OpenTelemetry spans on both transports, off unless
+- **Tracing**: optional OpenTelemetry spans on both transports, off unless
   `OTEL_EXPORTER_OTLP_ENDPOINT` is set. `make up` starts a local Jaeger
   (UI at http://localhost:16686):
 
@@ -242,8 +242,8 @@ background reaper:
 
 - **In-process:** `serve` runs a sweeper every `SWEEP_INTERVAL` that deletes
   expired files in batches of `SWEEP_BATCH`. Set `SWEEP_INTERVAL=0` to disable.
-- **One-off / cron:** `dropcrate sweep` reaps everything expired and exits —
-  handy as a Kubernetes CronJob when you prefer not to reap in-process.
+- **One-off / cron:** `dropcrate sweep` reaps everything expired and exits.
+  Handy as a Kubernetes CronJob when you prefer not to reap in-process.
 
 ```shell
 make sweep   # or: go run . sweep
